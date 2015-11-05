@@ -27,4 +27,5 @@
 
     <!-- Information strings -->
     <string name="network_not_available">Network is unreachable</string>
+    <string name="about_text">Alexandria book scanner application</string>
 </resources>
