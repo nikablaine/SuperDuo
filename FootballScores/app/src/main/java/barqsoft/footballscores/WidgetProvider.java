@@ -6,49 +6,36 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.RemoteViews;
+
+import java.util.Calendar;
 
 /**
  * @author Veronika Rodionova nika.blaine@gmail.com
  */
 public class WidgetProvider extends AppWidgetProvider {
 
-    private static final long UPDATE_INTERVAL = 5000;
-
-    @Override
-    public void onEnabled(Context context) {
-        Intent alarmIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                alarmIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT
-        );
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), UPDATE_INTERVAL, pendingIntent);
-        super.onEnabled(context);
-    }
+    private static final long UPDATE_INTERVAL = 60 * 1000L;
+    private PendingIntent service = null;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        final int N = appWidgetIds.length;
+        final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        // Perform this loop procedure for each App Widget that belongs to this provider
-        for (int i=0; i<N; i++) {
-            int appWidgetId = appWidgetIds[i];
+        final Calendar TIME = Calendar.getInstance();
+        TIME.set(Calendar.MINUTE, 0);
+        TIME.set(Calendar.SECOND, 0);
+        TIME.set(Calendar.MILLISECOND, 0);
 
-            // Create an Intent to launch ExampleActivity
-            // Intent intent = new Intent(context, ExampleActivity.class);
-            // PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-
-            // Get the layout for the App Widget and attach an on-click listener
-            // to the button
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
-
-            // context.getContentResolver().query()
-
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            appWidgetManager.updateAppWidget(appWidgetId, views);
+        final Intent intent = new Intent(context, WidgetUpdaterService.class);
+        if (service == null) {
+            service = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
+        alarmManager.setRepeating(AlarmManager.RTC, TIME.getTime().getTime(), UPDATE_INTERVAL, service);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        final AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(service);
     }
 }

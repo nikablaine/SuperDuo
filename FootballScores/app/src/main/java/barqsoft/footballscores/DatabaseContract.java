@@ -7,17 +7,17 @@ import android.provider.BaseColumns;
 /**
  * Created by yehya khaled on 2/25/2015.
  */
-public class DatabaseContract
+public class
+        DatabaseContract
 {
     public static final String SCORES_TABLE = "scores_table";
     public static final class scores_table implements BaseColumns
     {
-        //Table data
-        public static final String LEAGUE_COL = "league";
         public static final String DATE_COL = "date";
         public static final String TIME_COL = "time";
         public static final String HOME_COL = "home";
         public static final String AWAY_COL = "away";
+        public static final String LEAGUE_COL = "league";
         public static final String HOME_GOALS_COL = "home_goals";
         public static final String AWAY_GOALS_COL = "away_goals";
         public static final String MATCH_ID = "match_id";
@@ -49,4 +49,17 @@ public class DatabaseContract
     public static final String CONTENT_AUTHORITY = "barqsoft.footballscores";
     public static final String PATH = "scores";
     public static Uri BASE_CONTENT_URI = Uri.parse("content://"+CONTENT_AUTHORITY);
+
+    public static final String[] DEFAULT_PROJECTION = new String[] {
+            scores_table._ID,
+            scores_table.DATE_COL,
+            scores_table.TIME_COL,
+            scores_table.HOME_COL,
+            scores_table.AWAY_COL,
+            scores_table.LEAGUE_COL,
+            scores_table.HOME_GOALS_COL,
+            scores_table.AWAY_GOALS_COL,
+            scores_table.MATCH_ID,
+            scores_table.MATCH_DAY
+    };
 }
