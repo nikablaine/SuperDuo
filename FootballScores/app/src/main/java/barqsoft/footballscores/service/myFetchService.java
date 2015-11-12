@@ -39,7 +39,7 @@ public class myFetchService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        getData("n2");
+        getData("n3");
         getData("p2");
 
         return;
@@ -47,12 +47,14 @@ public class myFetchService extends IntentService {
 
     private void getData(String timeFrame) {
         //Creating fetch URL
-        final String BASE_URL = "http://api.football-data.org/alpha/fixtures"; //Base URL
+        final String BASE_URL = "http://api.football-data.org/v1/fixtures"; //Base URL
         final String QUERY_TIME_FRAME = "timeFrame"; //Time Frame parameter to determine days
         //final String QUERY_MATCH_DAY = "matchday";
 
-        Uri fetch_build = Uri.parse(BASE_URL).buildUpon().
-                appendQueryParameter(QUERY_TIME_FRAME, timeFrame).build();
+        Uri fetch_build = Uri.parse(BASE_URL)
+                .buildUpon()
+                .appendQueryParameter(QUERY_TIME_FRAME, timeFrame)
+                .build();
         //Log.v(LOG_TAG, "The url we are looking at is: "+fetch_build.toString()); //log spam
         HttpURLConnection m_connection = null;
         BufferedReader reader = null;
@@ -139,8 +141,8 @@ public class myFetchService extends IntentService {
         final String EREDIVISIE = "404";
 
 
-        final String SEASON_LINK = "http://api.football-data.org/alpha/soccerseasons/";
-        final String MATCH_LINK = "http://api.football-data.org/alpha/fixtures/";
+        final String SEASON_LINK = "http://api.football-data.org/v1/soccerseasons/";
+        final String MATCH_LINK = "http://api.football-data.org/v1/fixtures/";
         final String FIXTURES = "fixtures";
         final String LINKS = "_links";
         final String SOCCER_SEASON = "soccerseason";
@@ -251,7 +253,7 @@ public class myFetchService extends IntentService {
             inserted_data = mContext.getContentResolver().bulkInsert(
                     DatabaseContract.BASE_CONTENT_URI, insert_data);
 
-            //Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
+            Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
         }

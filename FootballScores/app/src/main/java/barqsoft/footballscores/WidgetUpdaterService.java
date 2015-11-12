@@ -12,11 +12,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import barqsoft.footballscores.data.FootballScore;
 import barqsoft.footballscores.data.ScoresAdapter;
@@ -57,26 +54,32 @@ public class WidgetUpdaterService extends Service {
         private void getFootballScoresFromCursor(Cursor cursor) {
             if (cursor != null && cursor.moveToFirst()) {
                 scores = new ArrayList<>();
+                parseCursor(cursor);
                 while (cursor.moveToNext()) {
-                    scores.add(
-                            new FootballScore(
-                                    cursor.getString(ScoresAdapter.COL_HOME),
-                                    cursor.getString(ScoresAdapter.COL_AWAY),
-                                    cursor.getInt(ScoresAdapter.COL_HOME_GOALS),
-                                    cursor.getInt(ScoresAdapter.COL_AWAY_GOALS),
-                                    cursor.getString(ScoresAdapter.COL_DATE),
-                                    cursor.getString(ScoresAdapter.COL_MATCHTIME)
-                            )
-                    );
+                    parseCursor(cursor);
                 }
                 cursor.close();
             }
         }
 
+        private void parseCursor(Cursor cursor) {
+            scores.add(
+                    new FootballScore(
+                            cursor.getString(ScoresAdapter.COL_HOME),
+                            cursor.getString(ScoresAdapter.COL_AWAY),
+                            cursor.getInt(ScoresAdapter.COL_HOME_GOALS),
+                            cursor.getInt(ScoresAdapter.COL_AWAY_GOALS),
+                            cursor.getString(ScoresAdapter.COL_DATE),
+                            cursor.getString(ScoresAdapter.COL_MATCHTIME)
+                    )
+            );
+        }
+
         @Override
         protected Void doInBackground(Void... params) {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String[] selectionArgs = new String[]{format.format(new Date())};
+            // SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            // String[] selectionArgs = new String[]{format.format(new Date())};
+            String[] selectionArgs = new String[] {"2015-11-09"};
             Cursor cursor = context.getContentResolver().query(
                     DatabaseContract.scores_table.buildScoreWithDate(),
                     DatabaseContract.DEFAULT_PROJECTION,
@@ -104,7 +107,9 @@ public class WidgetUpdaterService extends Service {
                 AppWidgetManager manager = AppWidgetManager.getInstance(context);
                 manager.updateAppWidget(thisWidget, view);
             } else {
-                view.setTextViewText(R.id.score_textview, getString(R.string.no_matches));
+                Log.d(LOG_TAG, "Before setting the text view..");
+                view.setTextViewText(R.id.score_textview, "XXX");
+                // getString(R.string.no_matches)
             }
         }
     }
