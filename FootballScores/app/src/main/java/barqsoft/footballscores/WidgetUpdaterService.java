@@ -12,8 +12,15 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.google.common.base.Throwables;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import barqsoft.footballscores.data.FootballScore;
 import barqsoft.footballscores.data.ScoresAdapter;
@@ -77,15 +84,16 @@ public class WidgetUpdaterService extends Service {
 
         @Override
         protected Void doInBackground(Void... params) {
-            // SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            // String[] selectionArgs = new String[]{format.format(new Date())};
-            String[] selectionArgs = new String[] {"2015-11-09"};
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String[] selectionArgs = new String[]{format.format(new Date())};
+            // String[] selectionArgs = new String[] {"2015-11-09"};
+            String sortOrder = DatabaseContract.scores_table.TIME_COL + " DESC";
             Cursor cursor = context.getContentResolver().query(
                     DatabaseContract.scores_table.buildScoreWithDate(),
                     DatabaseContract.DEFAULT_PROJECTION,
                     null,
                     selectionArgs,
-                    null
+                    sortOrder
             );
             getFootballScoresFromCursor(cursor);
             return null;
@@ -95,12 +103,31 @@ public class WidgetUpdaterService extends Service {
         protected void onPostExecute(Void aVoid) {
             RemoteViews view = new RemoteViews(getPackageName(), R.layout.widget);
             Log.d(LOG_TAG, "scores = " + scores);
+            Calendar calendar = Calendar.getInstance();
+            Date currentTime = new Date();
+            Date matchTime = new Date();
+            calendar.setTime(currentTime);
             if (scores != null) {
                 for (FootballScore score : scores) {
-                    view.setTextViewText(R.id.home_textview, score.getHome());
-                    view.setTextViewText(R.id.away_textview, score.getAway());
-                    view.setTextViewText(R.id.score_textview, Utilies.getScores(score.getHomeGoals(), score.getAwayGoals()));
-                    view.setTextViewText(R.id.date_textview, score.getDate());
+                    try {
+                        Date parsedTime = new SimpleDateFormat("hh:mm", Locale.getDefault()).parse(score.getTime());
+                        Calendar matchCalendar = Calendar.getInstance();
+                        matchCalendar.setTime(parsedTime);
+                        Log.d(LOG_TAG, "parsed time is " + parsedTime);
+                        calendar.set(Calendar.HOUR_OF_DAY, matchCalendar.get(Calendar.HOUR_OF_DAY));
+                        calendar.set(Calendar.MINUTE, matchCalendar.get(Calendar.MINUTE));
+                        matchTime = calendar.getTime();
+                    } catch (ParseException e) {
+                        Log.e(LOG_TAG, Throwables.getStackTraceAsString(e), e);
+                    }
+
+                    if (currentTime.after(matchTime)) {
+                        view.setTextViewText(R.id.home_textview, score.getHome());
+                        view.setTextViewText(R.id.away_textview, score.getAway());
+                        view.setTextViewText(R.id.score_textview, Utilies.getScores(score.getHomeGoals(), score.getAwayGoals()));
+                        view.setTextViewText(R.id.date_textview, score.getTime());
+                        break;
+                    }
                 }
                 // Push update for this widget to the home screen
                 ComponentName thisWidget = new ComponentName(context, WidgetProvider.class);
