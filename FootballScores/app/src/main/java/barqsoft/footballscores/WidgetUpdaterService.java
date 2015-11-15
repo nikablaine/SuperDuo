@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.google.common.base.Throwables;
@@ -122,6 +123,8 @@ public class WidgetUpdaterService extends Service {
                     }
 
                     if (currentTime.after(matchTime)) {
+                        view.setViewVisibility(R.id.empty_widget_view, View.GONE);
+                        view.setViewVisibility(R.id.normal_widget_view, View.VISIBLE);
                         view.setTextViewText(R.id.home_textview, score.getHome());
                         view.setTextViewText(R.id.away_textview, score.getAway());
                         view.setTextViewText(R.id.score_textview, Utilies.getScores(score.getHomeGoals(), score.getAwayGoals()));
@@ -134,9 +137,8 @@ public class WidgetUpdaterService extends Service {
                 AppWidgetManager manager = AppWidgetManager.getInstance(context);
                 manager.updateAppWidget(thisWidget, view);
             } else {
-                Log.d(LOG_TAG, "Before setting the text view..");
-                view.setTextViewText(R.id.score_textview, "XXX");
-                // getString(R.string.no_matches)
+                view.setViewVisibility(R.id.empty_widget_view, View.VISIBLE);
+                view.setViewVisibility(R.id.normal_widget_view, View.GONE);
             }
         }
     }
