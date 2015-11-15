@@ -4,8 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.RemoteViews;
 
 import java.util.Calendar;
 
@@ -31,6 +33,19 @@ public class WidgetProvider extends AppWidgetProvider {
             service = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         alarmManager.setRepeating(AlarmManager.RTC, TIME.getTime().getTime(), UPDATE_INTERVAL, service);
+
+        // open application on click on the widget
+        for (int appWidgetId : appWidgetIds) {
+            Intent applicationIntent = new Intent("android.intent.action.MAIN");
+            applicationIntent.addCategory("android.intent.category.LAUNCHER");
+            applicationIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            applicationIntent.setComponent(new ComponentName(context.getPackageName(), MainActivity.class.getName()));
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, applicationIntent, 0);
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
+            views.setOnClickPendingIntent(R.id.empty_widget_view, pendingIntent);
+            views.setOnClickPendingIntent(R.id.normal_widget_view, pendingIntent);
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+        }
     }
 
     @Override
